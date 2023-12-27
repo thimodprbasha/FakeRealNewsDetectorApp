@@ -8,7 +8,6 @@ import TextView from "./components/TextView/textView";
 function App() {
   const [text, setText] = useState("");
   const [texts, setTexts] = useState([]);
-  const [results, setResults] = useState(null);
   const [isLoading, setLoading] = useState(false);
   const [showResult, setShowResult] = useState(false);
 
@@ -79,17 +78,8 @@ function App() {
         setLoading(false);
         setTexts(data.result);
         toast.update(pending, toastProps.success);
-        console.log(results);
-        //   // setPreviewResult({
-        //   //   showResult: true,
-        //   //   err: false,
-        //   // });
       })
       .catch((error) => {
-        // setPreviewResult({
-        //   showResult: false,
-        //   err: true,
-        // });
         setLoading(false);
         toast.update(pending, (toastProps.error.render = error));
         console.error("Error:", error);
@@ -118,9 +108,9 @@ function App() {
               <>
                 <div className="col-lg-6  d-flex flex-column justify-content-center">
                   <div>
-                    <div class="mb-3">
+                    <div className="mb-3">
                       <textarea
-                        class="form-control"
+                        className="form-control"
                         disabled={showResult}
                         id="textarea"
                         value={text}
