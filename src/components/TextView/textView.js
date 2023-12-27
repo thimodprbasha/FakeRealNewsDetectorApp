@@ -30,6 +30,10 @@ const TextView = ({ data, showResult, state, toast, toastProps }) => {
     state(data.filter((e) => e.id !== element.id));
   };
 
+  const changePredictedClassColor = (cls) => {
+    return (cls === "Real" ? "text-success" : "text-danger") + " p-1"
+  }
+
   return (
     <div className="wrapper">
       <div className="content">
@@ -43,12 +47,17 @@ const TextView = ({ data, showResult, state, toast, toastProps }) => {
                 <div className="d-flex">
                   <h6 className="p-1">News : {element.id + 1}</h6>
                   {showResult ? (
-                    <h6 className="p-1">Predicted : {element.predicted_class}</h6>
+                    <h6 className="p-1 ms-2">
+                      Predicted : 
+                      <span className={changePredictedClassColor(element.predicted_class)}>{ element.predicted_class
+                      }</span>
+                      
+                    </h6>
                   ) : null}
                 </div>
 
                 <div className={showResult ? null : "row"}>
-                  <div className={showResult ? "col-md-12" : "col-md-11"}>
+                  <div className={showResult ? "col-md-12" : "col-md-11"} >
                     <div className="p-0">
                       <textarea
                         id={`textArea-id-${element.id}`}
