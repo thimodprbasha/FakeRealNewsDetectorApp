@@ -8,15 +8,9 @@ import TextView from "./components/TextView/textView";
 function App() {
   const [text, setText] = useState("");
   const [texts, setTexts] = useState([]);
-  // var isPreview = false;
-  // const [imageFiles, setImages] = useState(null);
-  // const [files, setFiles] = useState(null);
+  const [results, setResults] = useState(null);
   const [isLoading, setLoading] = useState(false);
-  // const [showImages, setPreview] = useState(false);
-  // const [showImageResult, setPreviewResult] = useState({
-  //   showResult: false,
-  //   err: false,
-  // });
+  const [showResult, setShowResult] = useState(false);
 
   const toastProps = {
     default: {
@@ -53,7 +47,7 @@ function App() {
       let textObj = {
         id: id,
         text: text,
-        disable : true
+        disable: true,
       };
       setTexts([...texts, textObj]);
       setText("");
@@ -65,46 +59,13 @@ function App() {
   const handleTextChange = (e) => {
     setText(e.target.value);
   };
-  // const handleFileSelected = (e) => {
-  //   setFiles([]);
-  //   setImages([]);
-  //   for (let i = 0; i < e.target.files.length; i++) {
-  //     const imgObj = {
-  //       image: URL.createObjectURL(e.target.files[i]),
-  //       file_name: e.target.files[i].name,
-  //     };
-  //     setFiles((fileArr) => [...fileArr, imgObj]);
-  //     setImages((fileArr) => [...fileArr, e.target.files[i]]);
-  //   }
-  // };
-
-  // const handleFileSubmition = () => {
-  //   if (files != null) {
-  //     setPreview(true);
-  //   } else {
-  //     toast.error((toastProps.error.render = "Please add a image"));
-  //   }
-  // };
-
-  // const handleData = (probs) => {
-  //   const newImgProps = probs.map((e) => {
-  //     const fileULR = files.find((x) => x.file_name === e.file_name);
-  //     console.log(fileULR);
-
-  //     e.image = fileULR.image;
-  //     return e;
-  //   });
-  //   setFiles(newImgProps);
-  //   isPreview = true;
-  // };
 
   const handleNewsubmission = async () => {
     const URL = "http://127.0.0.1:8000/api/detect-news-validation";
 
-   
-
     setLoading(true);
     const pending = toast.loading("Analyzing images");
+    setShowResult(true);
 
     await axios
       .post(URL, texts, {
@@ -114,21 +75,15 @@ function App() {
       })
       .then((result) => result.data)
       .then((data) => {
+        console.log(data);
         setLoading(false);
-        // handleData(data.result);
-        if (!data.error) {
-          // setPreviewResult({
-          //   showResult: true,
-          //   err: false,
-          // });
-          toast.update(pending, toastProps.success);
-        } else {
-          // setPreviewResult({
-          //   showResult: false,
-          //   err: true,
-          // });
-          toast.update(pending, (toastProps.error.render = data.error_msg));
-        }
+        setTexts(data.result);
+        toast.update(pending, toastProps.success);
+        console.log(results);
+        //   // setPreviewResult({
+        //   //   showResult: true,
+        //   //   err: false,
+        //   // });
       })
       .catch((error) => {
         // setPreviewResult({
@@ -141,10 +96,10 @@ function App() {
       });
   };
 
-  // const resetPage = () => {
-  //   window.location.reload(false);
-  //   serviceRef.current.scrollIntoView({ behavior: "smooth" });
-  // };
+  const resetPage = () => {
+    window.location.reload(false);
+    serviceRef.current.scrollIntoView({ behavior: "smooth" });
+  };
 
   return (
     <>
@@ -156,35 +111,59 @@ function App() {
               <div className="section-header">
                 <h2>Fake News Detector</h2>
               </div>
-              <p>Please upload brain MRI scan images to detect tumor type.</p>
+              <p>Please enter news article or description to validate the news is FAKE or REAL .</p>
             </div>
 
             {!isLoading ? (
-              <div className="col-lg-6  d-flex flex-column justify-content-center">
-                <div>
-                  <div class="mb-3">
-                    <textarea
-                      class="form-control"
-                      id="textarea"
-                      value={text}
-                      onChange={handleTextChange}
-                      on
-                      rows="5"
-                    ></textarea>
+              <>
+                <div className="col-lg-6  d-flex flex-column justify-content-center">
+                  <div>
+                    <div class="mb-3">
+                      <textarea
+                        class="form-control"
+                        disabled={showResult}
+                        id="textarea"
+                        value={text}
+                        onChange={handleTextChange}
+                        on
+                        rows="5"
+                      ></textarea>
+                    </div>
+                  </div>
+                  <div className="my-4 d-flex justify-content-center text-center ">
+                    <button
+                      className="btn btn-primary m-1"
+                      onClick={!showResult ? addText : resetPage}
+                    >
+                      {!showResult ? "Add" : "Restart"}
+                    </button>
+
+
+                      <button
+                        className="btn btn-success m-1"
+                        onClick={handleNewsubmission}
+                        disabled ={texts.length === 0 || (showResult && texts.length !== 0)}
+                      >
+                        Analyze News
+                      </button>
+
                   </div>
                 </div>
-                <div className="my-4 d-flex justify-content-center ">
-                  <button className="btn btn-primary m-1" onClick={addText}>
-                    Add News
-                  </button>
 
-                  {!(texts.length === 0) ? (
-                  <button className="btn btn-success m-1" onClick={handleNewsubmission}>
-                    Analyze News
-                  </button>
-                  ) : <></> }
-                </div>  
-              </div>
+                {!(texts.length === 0) ? (
+                  <div ref={serviceRef} className="col-lg-12 ">
+                    <TextView
+                      data={texts}
+                      showResult={showResult}
+                      state={setTexts}
+                      toast={toast}
+                      toastProps={toastProps}
+                    ></TextView>
+                  </div>
+                ) : (
+                  <></>
+                )}
+              </>
             ) : (
               <div className="col-lg-6  d-flex  justify-content-center">
                 <div
@@ -193,13 +172,6 @@ function App() {
                   role="status"
                 ></div>
               </div>
-            )}
-            {!(texts.length === 0) ? (
-              <div ref={serviceRef} className="col-lg-12 ">
-                <TextView data={texts} state={setTexts} toast={toast} toastProps={toastProps}></TextView>
-              </div>
-            ) : (
-              <></>
             )}
           </div>
         </div>
